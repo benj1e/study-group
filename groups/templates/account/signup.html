@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load form_tags %}
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="w-full">
+        <h1 class="text-center text-2xl font-bold mb-4">Sign Up</h1>
+        <p class="text-center mb-6">
+            Already have an account? Then please
+            <a href="{{ login_url }}" class="text-blue-500 hover:underline">sign in</a>.
+        </p>
+        {% partialdef signup_partial inline %}
+        <div class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-md">
+            <form method="post" action="{{ action_url }}" class="space-y-6">
+                {% csrf_token %}
+                {% for field in form %}
+                {% if not field.field.widget.input_type == 'checkbox' %}
+                <div class="flex flex-col">
+                    <label for="{{ field.id_for_label }}" class="custom-label">{{ field.label }}</label>
+                    {{ field|add_class:"border p-3 rounded" }}
+                </div>
+                {% else %}
+                <div class="flex gap-2">
+                    {{ field|add_class:"bg-indigo-600 pointer" }}
+                    <label for="{{ field.id_for_label }}" class="custom-label">{{ field.label }}</label>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {{ redirect_field }}
+                <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                    Sign Up
+                </button>
+            </form>
+            {% if PASSKEY_SIGNUP_ENABLED %}
+            <hr class="my-6" />
+            <div class="space-y-4">
+                <a href="{{ signup_by_passkey_url }}" class="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 flex items-center justify-center gap-2">
+                    Sign up using a passkey <i class="bi bi-key text-2xl"></i>
+                </a>
+            </div>
+            {% endif %}
+            <!-- Include social login options if enabled -->
+            {% if SOCIALACCOUNT_ENABLED %}
+            <div class="mt-6">
+                {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+            </div>
+            {% endif %}
+        </div>
+        {% endpartialdef signup_partial %}
+
+    </div>
+</div>
+{% endblock content %}

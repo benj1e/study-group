@@ -1,0 +1,18 @@
+{% extends 'base.html' %} 
+{% block content %}
+
+{% include "groups/components/navbar.html" %}
+
+
+<main class="flex flex-col">
+    <h1>Welcome to study-grps</h1>
+    <div class="flex gap-4 mx-auto w-fit">
+        <button class="border border-black p-3 rounded">Start a new group</button>
+        <button class="border border-black p-3 rounded">Invite friends</button>
+        <button class="border border-black p-3 rounded">Find study partners</button>
+    </div>
+</main>
+
+
+
+{% endblock content %}

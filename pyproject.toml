@@ -1,9 +1,15 @@
 [project]
 name = "study-group"
 version = "0.1.0"
-description = "Add your description here"
+description = "Study Group is a web-based platform designed to streamline student collaboration and study group management. The platform aims to solve common challenges students face when organizing study sessions, sharing resources, and working on group projects."
 readme = "README.md"
+license = "LICENSE"
 requires-python = ">=3.12"
 dependencies = [
     "django>=5.1.4",
+    "django-allauth[socialaccount]>=65.3.1",
+    "django-template-partials>=24.4",
+    "pillow>=11.1.0",
+    "python-decouple>=3.8",
+    "requests>=2.32.3",
 ]

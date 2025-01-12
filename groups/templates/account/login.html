@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load form_tags %}
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="w-full">
+        <h1 class="text-center text-2xl font-bold mb-4">Sign In</h1>
+        <p class="text-center mb-6">
+            If you have not created an account yet, then please
+            <a href="{{ signup_url }}" class="text-blue-500 hover:underline">sign up</a> first.
+        </p>
+        <div class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-md">
+            <form method="post" action="{{ login_url }}" class="space-y-6">
+                {% csrf_token %}
+                {% for field in form %}
+                {% if not field.field.widget.input_type == 'checkbox' %}
+                <div class="flex flex-col">
+                    <label for="{{ field.id_for_label }}" class="custom-label">{{ field.label }}</label>
+                    {{ field|add_class:"border p-3 rounded" }}
+                </div>
+                {% else %}
+                <div class="flex gap-2">
+                    {{ field|add_class:"bg-indigo-600 pointer" }}
+                    <label for="{{ field.id_for_label }}" class="custom-label">{{ field.label }}</label>
+                </div>
+                {% endif %}
+                
+                {% endfor %}
+                {{ redirect_field }}
+                <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                    Sign In
+                </button>
+            </form>
+            
+            {% if PASSKEY_LOGIN_ENABLED %}
+            <hr class="my-6" />
+            
+            <div class="space-y-4">
+                <button type="submit" form="mfa_login" id="passkey_login" class="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 flex items-center justify-center gap-2">
+                    Sign in with a passkey <i class="bi bi-key text-2xl"></i>
+                </button>
+                <a href="{{ request_login_code_url }}" class="text-blue-500 hover:underline">
+                    Mail me a sign-in code
+                </a>
+            </div>
+            {% endif %}
+            <!-- Include social login options if enabled -->
+            {% if SOCIALACCOUNT_ENABLED %}
+            <div class="mt-6">
+                {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+            </div>
+            {% endif %}
+            <!-- Include extra body scripts if needed -->
+            {% if PASSKEY_LOGIN_ENABLED %}
+            {% include "mfa/webauthn/snippets/login_script.html" with button_id="passkey_login" %}
+            {% endif %}
+
+            <a href="{% url "index" %}" class="text-blue-500 text-center flex items-center justify-center my-4 w-fit hover:text-underline"><i class="bi bi-left-arrow"></i> Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock content %}

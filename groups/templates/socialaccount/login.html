@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+{% load allauth %}
+{% block head_title %}
+    {% trans "Sign In" %}
+{% endblock head_title %}
+{% block content %}
+    <div class="max-w-md mx-auto my-40 p-6 bg-white rounded-lg shadow-md">
+        {% if process == "connect" %}
+            <h1 class="text-2xl font-bold mb-4">
+                {% blocktrans with provider.name as provider %}Connect {{ provider }}{% endblocktrans %}
+            </h1>
+            <p class="mb-4">
+                {% blocktrans with provider.name as provider %}You are about to connect a new third-party account from {{ provider }}.{% endblocktrans %}
+            </p>
+        {% else %}
+            <h1 class="text-2xl flex items-center justify-center font-bold mb-4">
+                {% blocktrans with provider.name as provider %}Sign in with {% endblocktrans %}
+                <img src="{% static "icons/google.svg" %}" alt="">
+            </h1>
+            <p class="mb-4">
+                {% blocktrans with provider.name as provider %}You are about to sign in using a third-party account from {{ provider }}.{% endblocktrans %}
+            </p>
+        {% endif %}
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <button type="submit" class="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-700">
+                {% trans "Continue" %}
+            </button>
+        </form>
+    </div>
+{% endblock content %}
