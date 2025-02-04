@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block head_title %}
+    {% trans "Third-Party Login Failure" %}
+{% endblock head_title %}
+{% block content %}
+    <div class="flex flex-col items-center gap-4 mx-auto mt-32 border p-4 rounded-lg w-fit">
+        <h1 class="text-3xl font-bold">Third-Party Login Failure</h1>
+        <p>An error occurred while attempting to login via your third-party account.</p>
+        <a href="{% url "index" %}" class="underline text-blue-500 font-bold">Go back</a>
+    </div>
+{% endblock content %}

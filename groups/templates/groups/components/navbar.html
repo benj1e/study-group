@@ -22,6 +22,9 @@
                 </li>
             {% else %}
                 <li>
+                    {% partial nav_profile %}
+                </li>
+                <li>
                     <button type="button" class="border px-3 py-2 rounded border-black" hx-get="{% url 'account_logout' %}" hx-target="#logout-container" popovertarget="logout-container" hx-select=".popover-element" >Logout</button>
                 </li>
             {% endif %}
@@ -34,3 +37,37 @@
     
 </div>
 {% endpartialdef logout_container %}
+
+{% partialdef nav_profile %}
+        <div class="flex items-center gap-2" hx-on:click="alert('clicked')">
+            <img
+                src="{{ request.user.profile.avatar }}"
+                alt="avatar"
+                class="w-10 h-10 rounded-full"
+            />
+            <span class="text-lg font-semibold">
+                {% if not request.user.full_name %}{{ request.user.username }}{% else %}{{ request.user.full_name }}{% endif %}</span>
+        </div>
+    <div id="popover" class="absolute top-16 right-0 bg-white shadow-lg p-4 flex flex-col">
+    {% if setting %}
+        {% partial settings %}
+        {% endif %}
+    </div>
+{% endpartialdef nav_profile %}
+{% partialdef settings %}
+    {% comment %} <a href="{% url 'profile' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Profile</a>
+    <a href="{% url 'account_change_password' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Change Password</a>
+    <a href="{% url 'account_change_email' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Change Email</a>
+    <a href="{% url 'account_change_username' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Change Username</a>
+    <a href="{% url 'account_change_avatar' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Change Avatar</a>
+    <a href="{% url 'account_change_phone' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Change Phone</a>
+    <a href="{% url 'account_change_bio' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Change Bio</a>
+    <a href="{% url 'account_change_theme' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Change Theme</a>
+    <a href="{% url 'account_change_language' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Change Language</a>
+    <a href="{% url 'account_change_timezone' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Change Timezone</a>
+    <a href="{% url 'account_change_currency' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Change Currency</a>
+    <a href="{% url 'account_change_country' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Change Country</a>
+    <a href="{% url 'account_change_region' %}" class="p-3 hover:bg-indigo-600 hover:text-white">Change Region</a> {% endcomment %}
+    <a href="#"> <i class="bi bi-profile"></i> Profile</a>
+    <a href="#"><i class="box-arrow-left"></i>Logout</a>
+{% endpartialdef settings %}

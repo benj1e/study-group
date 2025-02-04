@@ -6,56 +6,59 @@ from allauth.account.signals import user_signed_up
 from allauth.socialaccount.models import SocialAccount
 from .models import Profile
 from django.contrib.auth import get_user_model
+import requests
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from django.conf import settings
 
-user = get_user_model()
+User = get_user_model()
 
 
-def get_or_create_profile_pic(profile: Profile, user):
-    first_name, last_name = user.first_name, user.last_name
-    print(user)
+def fetch_and_save_avatar(profile: Profile, avatar_url: str):
+    """Fetch the avatar from the provided URL and save it to the profile."""
+    try:
+        response = requests.get(avatar_url)
+        if response.ok:
+            file_path = default_storage.save(
+                f"{settings.MEDIA_ROOT}/avatars/{profile.user.username}.jpg",
+                ContentFile(response.content),
+            )
+            profile.avatar = file_path
+            profile.save()
+    except requests.RequestException as e:
+        # Log the exception or handle it as needed
+        print(f"Failed to fetch avatar: {e}")
+
+
+def create_avatar(profile: Profile, user):
+    """Check and save the user's profile picture from social accounts."""
+    # Skip if the profile already has an avatar
+    if profile.avatar and default_storage.exists(profile.avatar.path):
+        print(profile.user.username, "already has an avatar", "at", profile.avatar.path)
+        return
 
     # Attempt to get the social account's profile picture
-    profile_pic = None
-    try:
-        social_account = SocialAccount.objects.filter(user=user).first()
-        if social_account:
-            profile_pic = social_account.extra_data.get("picture")
-
-        if not profile_pic:  # If no social picture, construct based on names
-            if first_name and last_name:
-                profile_pic = f"https://avatar.iran.liara.run/username?username={first_name+last_name}"
-            else:
-                profile_pic = "https://avatar.iran.liara.run/public"
-
-        # Save the profile picture to the profile
-        profile.profile_picture = profile_pic
-        profile.save()
-
-        print("Profile picture saved successfully")
-    except SocialAccount.DoesNotExist:
-        # Handle case where no social account exists (fallback logic)
-        profile.profile_picture = "https://avatar.iran.liara.run/public"
-        profile.save()
+    social_account = SocialAccount.objects.filter(user=user).first()
+    if social_account:
+        avatar_url = social_account.extra_data.get("picture")
+        if avatar_url:
+            fetch_and_save_avatar(profile, avatar_url)
 
 
 @receiver(user_signed_up)
-def create_profile_for_social_user(sender, request: HttpRequest, user: User, **kwargs):
-    """Signal for saving user's profile pictures"""
-    profile, created = Profile.objects.get_or_create(user=user)
-    get_or_create_profile_pic(profile, user)
+def create_profile_for_social_user(sender, request: HttpRequest, user, **kwargs):
+    """Signal to create a profile and fetch avatar for social users on signup."""
+    profile, _ = Profile.objects.get_or_create(user=user)
+    create_avatar(profile, user)
 
 
-@receiver(signal=post_save, sender=user)
-def create_profile_before_save(sender, instance, created, **kwargs):
-    """Signal for saving user's profile pictures"""
+@receiver(post_save, sender=Profile)
+def create_or_update_profile(sender, instance, created, **kwargs):
+    """Signal to create or update a user's profile and fetch avatar if necessary."""
+    # Create a profile if it doesn't exist
+    profile, _ = Profile.objects.get_or_create(id=instance.id)
+    instance = instance.user
 
-    if created:
-        Profile.objects.create(user=instance)
-
-    if Profile.objects.filter(user=instance).exists():
-        profile = Profile.objects.get(user=instance)
-        get_or_create_profile_pic(profile, instance)
-    else:
-        Profile.objects.create(user=instance)
-        profile = Profile.objects.get(user=instance)
-        get_or_create_profile_pic(profile, instance)
+    # If the user has no avatar, attempt to fetch it
+    if created or not profile.avatar or not default_storage.exists(profile.avatar.path):
+        create_avatar(profile, instance)
